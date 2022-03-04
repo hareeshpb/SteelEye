@@ -1,15 +1,11 @@
 import configparser
-from fileinput import filename
-from tabnanny import filename_only
-from urllib import response
 import requests
 import xml.etree.ElementTree as ET
-from lxml import etree
 import xmltodict
-import pandas as pd
 from io import BytesIO
 from zipfile import ZipFile
 import os
+from csv import DictWriter
 
 config = configparser.RawConfigParser()
 config.read('config.ini')
@@ -24,7 +20,6 @@ def download_xml(url: str, filename: str) -> bool:
 
 
 def handle_zip(url: str) -> bool:
-    print(url)
     resp = requests.get(url)
     zipfile = ZipFile(BytesIO(resp.content))
     zipfile.extractall('./dl')
@@ -58,15 +53,33 @@ def xml_to_csv(filename: str, xpath: str) -> bool:
     keys = keys.split(',',)
     for key in keys:
         xml_dict = xml_dict[key]
-    # for x in range(len(xml_dict)):
-    vars = config['Inputs']['Path3']
-    vars = vars.split(',',)
-    for var in vars:
-        _var = var.split('.',)
-        if(len(_var) == 2):
-            print(var, ':', xml_dict[0]['TermntdRcrd'][_var[0]][_var[1]])
-        elif(len(_var) == 1):
-            print(var, ':', xml_dict[0]['TermntdRcrd'][_var[0]])
+    for x in range(len(xml_dict)):
+        fixed_path = config['Inputs']['Path3']
+        vars = config['Inputs']['Path4']
+        vars = vars.split(',',)
+        dict = {}
+        for var in vars:
+            _var = var.split('.',)
+            if(len(_var) == 2):
+                dict[var] = xml_dict[0][fixed_path][_var[0]][_var[1]]
+            elif(len(_var) == 1):
+                dict[var] = xml_dict[0][fixed_path][_var[0]]
+        csv_writer(dict)
+
+
+def csv_writer(row: dict):
+    file_exists = os.path.isfile('CSVFILE.csv')
+    headersCSV = config['Inputs']['Path4']
+    headersCSV = headersCSV.split(',',)
+    with open('CSVFILE.csv', 'a', newline='') as f_object:
+        dictwriter_object = DictWriter(f_object, fieldnames=headersCSV)
+        if not file_exists:
+            dictwriter_object.writeheader()
+        dictwriter_object.writerow(row)
+
+
+def uploadtos3() -> bool:
+    pass
 
 
 def orchestrator():
@@ -77,9 +90,10 @@ def orchestrator():
                              link_position=link_position, link_type=link_type)
     handle_zip(dl_link)
     filename = latest_file(path='./dl')
-    print(filename)
+    os.remove('CSVFILE.csv')
     xpath = config['Inputs']['xpath2']
     xml_to_csv(filename='./dl/'+filename, xpath=xpath)
+    uploadtos3()
 
 
 orchestrator()

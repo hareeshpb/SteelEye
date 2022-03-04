@@ -39,6 +39,8 @@ def handle_zip(url: str) -> None:
     except IOError as exception:
         ErrorLogger(exception)
 
+# The xpath is read from config
+
 
 def xml_parse_link(filename: str, xpath: str, link_type: str, link_position: int) -> str:
     try:
@@ -52,6 +54,9 @@ def xml_parse_link(filename: str, xpath: str, link_type: str, link_position: int
         elif(child.attrib['name'] == 'file_type' and child.text == link_type):
             return download_link
 
+# This funtion ensures the latest downloaded file is taken up for
+# processing, even though the file is destroyed after processing
+
 
 def latest_file(path: str) -> str:
     try:
@@ -63,6 +68,11 @@ def latest_file(path: str) -> str:
     for file in files:
         if file in max_paths:
             return file
+
+# The required keys for dict are read from configuration files.
+# Path2 -> The nested keys in order before looping through enteries
+# Path3 -> The fixed path after that. ie. [0].Path3, [1].Path3
+# Path4 -> The variable paths post Path3
 
 
 def xml_to_dict(filename: str, xpath: str) -> bool:
@@ -84,10 +94,10 @@ def xml_to_dict(filename: str, xpath: str) -> bool:
                 dict[var] = xml_dict[0][fixed_path][_var[0]][_var[1]]
             elif(len(_var) == 1):
                 dict[var] = xml_dict[0][fixed_path][_var[0]]
-        csv_writer(dict)
+        csv_writer(row=dict)
 
 
-def csv_writer(row: dict):
+def csv_writer(row: dict) -> None:
     file_exists = os.path.isfile('CSVFILE.csv')
     headersCSV = config['Inputs']['Path4']
     headersCSV = headersCSV.split(',',)
@@ -98,7 +108,7 @@ def csv_writer(row: dict):
         dictwriter_object.writerow(row)
 
 
-def uploadtos3() -> bool:
+def uploadtos3() -> None:
     S3_ACCESS_KEY = config['AWS']['AccessKey']
     S3_SECRET_KEY = config['AWS']['SecretKey']
     BUCKET_NAME = config['AWS']['BucketName']
@@ -113,7 +123,7 @@ def uploadtos3() -> bool:
         ErrorLogger("Credentials not available")
 
 
-def orchestrator():
+def orchestrator() -> None:
     xpath = config['Inputs']['xpath1']
     link_position = int(config['Inputs']['link_position'])
     link_type = config['Inputs']['link_type']

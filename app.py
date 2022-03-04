@@ -128,4 +128,5 @@ def orchestrator():
     uploadtos3()
 
 
-orchestrator()
+if __name__ == '__main__':
+    orchestrator()

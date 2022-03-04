@@ -84,16 +84,27 @@ def xml_to_dict(filename: str, xpath: str) -> bool:
     for key in keys:
         xml_dict = xml_dict[key]
     for x in range(len(xml_dict)):
-        fixed_path = config['Inputs']['Path3']
+        fixed_paths = config['Inputs']['Path3']
+        fixed_paths = fixed_paths.split(',',)
         vars = config['Inputs']['Path4']
         vars = vars.split(',',)
         dict = {}
+
+        def fetch_element(n):
+            nonlocal dict
+            if(len(_var) == 2):
+                dict[var] = xml_dict[x][fixed_paths[n]][_var[0]][_var[1]]
+            elif(len(_var) == 1):
+                dict[var] = xml_dict[0][fixed_paths[n]][_var[0]]
         for var in vars:
             _var = var.split('.',)
-            if(len(_var) == 2):
-                dict[var] = xml_dict[x][fixed_path][_var[0]][_var[1]]
-            elif(len(_var) == 1):
-                dict[var] = xml_dict[0][fixed_path][_var[0]]
+            for n in range(len(fixed_paths)):
+                try:
+                    fetch_element(n)
+                except:
+                    pass
+        if(dict is None):
+            print(x, xml_dict[x])
         csv_writer(row=dict)
 
 

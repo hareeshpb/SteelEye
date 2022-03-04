@@ -91,7 +91,7 @@ def xml_to_dict(filename: str, xpath: str) -> bool:
         for var in vars:
             _var = var.split('.',)
             if(len(_var) == 2):
-                dict[var] = xml_dict[0][fixed_path][_var[0]][_var[1]]
+                dict[var] = xml_dict[x][fixed_path][_var[0]][_var[1]]
             elif(len(_var) == 1):
                 dict[var] = xml_dict[0][fixed_path][_var[0]]
         csv_writer(row=dict)

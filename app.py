@@ -8,28 +8,43 @@ import os
 from csv import DictWriter
 import boto3
 from botocore.exceptions import NoCredentialsError
+from app_logger import ErrorLogger, EventLogger
 
+# Variable data written in Configuration File
 config = configparser.RawConfigParser()
 config.read('config.ini')
 
 
-def download_xml(url: str, filename: str) -> bool:
-    resp = requests.get(url)
+def download_xml(url: str, filename: str) -> None:
+    try:
+        resp = requests.get(url)
+    except requests.HTTPError as exception:
+        ErrorLogger(exception)
     os.remove(filename)
-    with open(filename, 'wb') as f:
-        f.write(resp.content)
-    return True
+    try:
+        with open(filename, 'wb') as f:
+            f.write(resp.content)
+    except IOError as exception:
+        ErrorLogger(exception)
 
 
-def handle_zip(url: str) -> bool:
-    resp = requests.get(url)
-    zipfile = ZipFile(BytesIO(resp.content))
-    zipfile.extractall('./dl')
-    return True
+def handle_zip(url: str) -> None:
+    try:
+        resp = requests.get(url)
+    except requests.HTTPError as exception:
+        ErrorLogger(exception)
+    try:
+        zipfile = ZipFile(BytesIO(resp.content))
+        zipfile.extractall('./dl')
+    except IOError as exception:
+        ErrorLogger(exception)
 
 
 def xml_parse_link(filename: str, xpath: str, link_type: str, link_position: int) -> str:
-    tree = ET.parse(filename)
+    try:
+        tree = ET.parse(filename)
+    except ET.ParseError as exception:
+        ErrorLogger(exception)
     root = tree.getroot()
     for child in root.find(xpath):
         if(child.attrib['name'] == 'download_link'):
@@ -39,7 +54,10 @@ def xml_parse_link(filename: str, xpath: str, link_type: str, link_position: int
 
 
 def latest_file(path: str) -> str:
-    files = os.listdir(path)
+    try:
+        files = os.listdir(path)
+    except IOError as exception:
+        ErrorLogger(exception)
     paths = [os.path.join(path, basename) for basename in files]
     max_paths = max(paths, key=os.path.getctime)
     for file in files:
@@ -47,7 +65,7 @@ def latest_file(path: str) -> str:
             return file
 
 
-def xml_to_csv(filename: str, xpath: str) -> bool:
+def xml_to_dict(filename: str, xpath: str) -> bool:
     with open(filename, 'r', encoding='utf-8') as file:
         my_xml = file.read()
     xml_dict = xmltodict.parse(my_xml)
@@ -88,14 +106,11 @@ def uploadtos3() -> bool:
                       aws_secret_access_key=S3_SECRET_KEY)
     try:
         s3.upload_file('CSVFILE.csv', BUCKET_NAME, 'CSVFILE.csv')
-        print("Upload Successful")
-        return True
+        EventLogger("Upload Successful")
     except FileNotFoundError:
-        print("The file was not found")
-        return False
+        ErrorLogger("The file was not found")
     except NoCredentialsError:
-        print("Credentials not available")
-        return False
+        ErrorLogger("Credentials not available")
 
 
 def orchestrator():
@@ -109,7 +124,7 @@ def orchestrator():
     if(os.path.isfile('CSVFILE.csv')):
         os.remove('CSVFILE.csv')
     xpath = config['Inputs']['xpath2']
-    xml_to_csv(filename='./dl/'+filename, xpath=xpath)
+    xml_to_dict(filename='./dl/'+filename, xpath=xpath)
     uploadtos3()
 
 

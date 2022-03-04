@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module app</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>app</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5C96891%5Conedrive%20-%20um%20balqees%20national%20co.%20llc%5Cdocuments%5Csteeleye%5Capp.py">c:\users\96891\onedrive - um balqees national co. llc\documents\steeleye\app.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="xml.etree.ElementTree.html">xml.etree.ElementTree</a><br>
+<a href="boto3.html">boto3</a><br>
+</td><td width="25%" valign=top><a href="configparser.html">configparser</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="requests.html">requests</a><br>
+<a href="xmltodict.html">xmltodict</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-csv_writer"><strong>csv_writer</strong></a>(row: dict) -&gt; None</dt><p>The required data is serial written to CSV using the dict write method</p></dl>
+ <dl><dt><a name="-download_xml"><strong>download_xml</strong></a>(url: str, filename: str) -&gt; None</dt><p>The intital xml is downloaded as input.xml</p></dl>
+ <dl><dt><a name="-handle_zip"><strong>handle_zip</strong></a>(url: str) -&gt; None</dt><p>The zip file is downloaded and unzipped to 'dl' folder</p></dl>
+ <dl><dt><a name="-latest_file"><strong>latest_file</strong></a>(path: str) -&gt; str</dt><p>Function returns the latest file from the folder</p></dl>
+ <dl><dt><a name="-orchestrator"><strong>orchestrator</strong></a>() -&gt; None</dt><p>Cordinated all other functions</p></dl>
+ <dl><dt><a name="-uploadtos3"><strong>uploadtos3</strong></a>() -&gt; None</dt><p>Using boto uploads to the S3 Bucket</p></dl>
+ <dl><dt><a name="-xml_parse_link"><strong>xml_parse_link</strong></a>(filename: str, xpath: str, link_type: str, link_position: int) -&gt; str</dt><p>Function return the required link from XML</p></dl>
+ <dl><dt><a name="-xml_to_dict"><strong>xml_to_dict</strong></a>(filename: str, xpath: str) -&gt; bool</dt><p>Dict is better to accees the XML nests</p></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>config</strong> = &lt;configparser.RawConfigParser object&gt;<p>The input data is provided in the config.ini file</p></td></tr></table>
+</body></html>

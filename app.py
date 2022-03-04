@@ -6,6 +6,8 @@ from io import BytesIO
 from zipfile import ZipFile
 import os
 from csv import DictWriter
+import boto3
+from botocore.exceptions import NoCredentialsError
 
 config = configparser.RawConfigParser()
 config.read('config.ini')
@@ -79,7 +81,21 @@ def csv_writer(row: dict):
 
 
 def uploadtos3() -> bool:
-    pass
+    S3_ACCESS_KEY = config['AWS']['AccessKey']
+    S3_SECRET_KEY = config['AWS']['SecretKey']
+    BUCKET_NAME = config['AWS']['BucketName']
+    s3 = boto3.client('s3', aws_access_key_id=S3_ACCESS_KEY,
+                      aws_secret_access_key=S3_SECRET_KEY)
+    try:
+        s3.upload_file('CSVFILE.csv', BUCKET_NAME, 'CSVFILE.csv')
+        print("Upload Successful")
+        return True
+    except FileNotFoundError:
+        print("The file was not found")
+        return False
+    except NoCredentialsError:
+        print("Credentials not available")
+        return False
 
 
 def orchestrator():
@@ -90,7 +106,8 @@ def orchestrator():
                              link_position=link_position, link_type=link_type)
     handle_zip(dl_link)
     filename = latest_file(path='./dl')
-    os.remove('CSVFILE.csv')
+    if(os.path.isfile('CSVFILE.csv')):
+        os.remove('CSVFILE.csv')
     xpath = config['Inputs']['xpath2']
     xml_to_csv(filename='./dl/'+filename, xpath=xpath)
     uploadtos3()

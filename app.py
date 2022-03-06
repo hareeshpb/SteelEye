@@ -135,6 +135,8 @@ def uploadtos3() -> None:
 
 
 def orchestrator() -> None:
+    url = config['Inputs']['url']
+    download_xml(url=url, filename='input.xml')
     xpath = config['Inputs']['xpath1']
     link_position = int(config['Inputs']['link_position'])
     link_type = config['Inputs']['link_type']

@@ -1,5 +1,6 @@
 from ast import Return
 import configparser
+from logging import exception
 import requests
 import xml.etree.ElementTree as ET
 import xmltodict
@@ -90,28 +91,32 @@ def xml_to_dict(filename: str, xpath: str) -> bool:
     for key in keys:
         xml_dict = xml_dict[key]
     for x in range(len(xml_dict)):
-        fixed_paths = config['Inputs']['Path3']
-        fixed_paths = fixed_paths.split(',',)
-        vars = config['Inputs']['Path4']
-        vars = vars.split(',',)
-        dict = {}
+        try:
+            fixed_paths = config['Inputs']['Path3']
+            fixed_paths = fixed_paths.split(',',)
+            vars = config['Inputs']['Path4']
+            vars = vars.split(',',)
+            dict = {}
 
-        def fetch_element(n):
-            nonlocal dict
-            if(len(_var) == 2):
-                dict[var] = xml_dict[x][fixed_paths[n]][_var[0]][_var[1]]
-            elif(len(_var) == 1):
-                dict[var] = xml_dict[0][fixed_paths[n]][_var[0]]
-        for var in vars:
-            _var = var.split('.',)
-            for n in range(len(fixed_paths)):
-                try:
-                    fetch_element(n)
-                except:
-                    pass
-        if(dict is None):
-            print(x, xml_dict[x])
-        csv_writer(row=dict)
+            def fetch_element(n):
+                nonlocal dict
+                if(len(_var) == 2):
+                    dict[var] = xml_dict[x][fixed_paths[n]][_var[0]][_var[1]]
+                elif(len(_var) == 1):
+                    dict[var] = xml_dict[0][fixed_paths[n]][_var[0]]
+            for var in vars:
+                _var = var.split('.',)
+                for n in range(len(fixed_paths)):
+                    try:
+                        fetch_element(n)
+                    except:
+                        pass
+            if(dict is None):
+                print(x, xml_dict[x])
+            csv_writer(row=dict)
+        except KeyError as exception:
+            ErrorLogger(exception)
+            return False
     return True
 
 
@@ -126,19 +131,23 @@ def csv_writer(row: dict) -> None:
         dictwriter_object.writerow(row)
 
 
-def uploadtos3() -> None:
+def uploadtos3() -> bool:
     S3_ACCESS_KEY = config['AWS']['AccessKey']
     S3_SECRET_KEY = config['AWS']['SecretKey']
     BUCKET_NAME = config['AWS']['BucketName']
     s3 = boto3.client('s3', aws_access_key_id=S3_ACCESS_KEY,
                       aws_secret_access_key=S3_SECRET_KEY)
     try:
+
         s3.upload_file('CSVFILE.csv', BUCKET_NAME, 'CSVFILE.csv')
         EventLogger("Upload Successful")
+        print("tested this")
+        return True
     except FileNotFoundError:
         ErrorLogger("The file was not found")
     except NoCredentialsError:
         ErrorLogger("Credentials not available")
+    return False
 
 
 def orchestrator() -> None:
@@ -151,10 +160,12 @@ def orchestrator() -> None:
                              link_position=link_position, link_type=link_type)
     handle_zip(dl_link)
     filename = latest_file(path='./dl')
+    filename = './dl/'+filename
     if(os.path.isfile('CSVFILE.csv')):
         os.remove('CSVFILE.csv')
     xpath = config['Inputs']['xpath2']
-    xml_to_dict(filename='./dl/'+filename, xpath=xpath)
+    xml_to_dict(filename=filename, xpath=xpath)
+    os.remove(filename)
     uploadtos3()
 
 

@@ -1,3 +1,4 @@
+from ast import Return
 import configparser
 import requests
 import xml.etree.ElementTree as ET
@@ -15,20 +16,23 @@ config = configparser.RawConfigParser()
 config.read('config.ini')
 
 
-def download_xml(url: str, filename: str) -> None:
+def download_xml(url: str, filename: str) -> bool:
     try:
         resp = requests.get(url)
     except requests.HTTPError as exception:
         ErrorLogger(exception)
-    os.remove(filename)
+    if (os.path.isfile(filename)):
+        os.remove(filename)
     try:
         with open(filename, 'wb') as f:
             f.write(resp.content)
+        return True
     except IOError as exception:
         ErrorLogger(exception)
+        return False
 
 
-def handle_zip(url: str) -> None:
+def handle_zip(url: str) -> bool:
     try:
         resp = requests.get(url)
     except requests.HTTPError as exception:
@@ -36,8 +40,10 @@ def handle_zip(url: str) -> None:
     try:
         zipfile = ZipFile(BytesIO(resp.content))
         zipfile.extractall('./dl')
+        return True
     except IOError as exception:
         ErrorLogger(exception)
+        return False
 
 # The xpath is read from config
 
@@ -106,6 +112,7 @@ def xml_to_dict(filename: str, xpath: str) -> bool:
         if(dict is None):
             print(x, xml_dict[x])
         csv_writer(row=dict)
+    return True
 
 
 def csv_writer(row: dict) -> None:
